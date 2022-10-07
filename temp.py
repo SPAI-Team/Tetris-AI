@@ -1,4 +1,5 @@
 import sys
+from turtle import done
 from PyQt5 import QtWidgets, QtCore, QtGui
 import tkinter as tk
 from PIL import ImageGrab
@@ -18,15 +19,21 @@ REFRESH_RATE = 15
 
 run_ai = False
 
+def same_color(a, b):
+	ans = True
+	for i in range(len(a)):
+		ans &= a[i] == b[i]
+	return ans
+
+
 def rgb_hack(rgb):
 	return "#%02x%02x%02x" % rgb  
 
 def sync_AI(coords):
 	count = 0
 	img_pro = ImageProcessor(None, coords)
-	while run_ai:
-		img_pro.analyze()
-		time.sleep(1 / REFRESH_RATE)
+	img_pro.analyze()
+	# time.sleep(1 / REFRESH_RATE)
 
 def thread_AI(coords):
 	t1 = threading.Thread(target = lambda: sync_AI(coords))
@@ -106,7 +113,29 @@ class ImageProcessor():
 	def __init__(self, img, coords):
 		self.img = img
 		self.coords = coords
+		self.white = [255, 255, 255]
 		pass
+
+	def _get_white(self):
+		img = np.array(ImageGrab.grab(bbox=self.coords))
+		gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+		dim, x_len, y_len = img.shape[::-1]
+		gray_white = max(gray.flatten())
+		done_loop = False
+		a, b = 0, 0
+		for j in range(y_len):
+			for i in range(x_len):
+				if gray[j][i] == gray_white:
+					a = i
+					b = j
+					done_loop = True
+					break
+
+			if done_loop:
+				break
+
+		return img[b][a]
+
 
 	def setup(self):
 		dim, x_len, y_len = self.img.shape[::-1]
@@ -159,14 +188,47 @@ class ImageProcessor():
 		final[3] += self.coords[1]
 
 		final[1] -= ((final[3] - final[1]) / 20) * 2
+		
+		self.white = self._get_white()
 
 		return final
 
 	def analyze(self):
 		img = ImageGrab.grab(bbox=self.coords)
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
-		print(len(img))
+
+		dim, x_len, y_len = img.shape[::-1]
+
+		dx = 0
+		base_coords = [0, 0]
+		
+		done_loop = False
+		for i in range(x_len):
+			for j in range(y_len):
+				if (same_color(img[j][i], self.white)):
+					base_coords[0] = i
+					base_coords[1] = j
+					done_loop = True
+					break
+			if done_loop:
+				break
 	
+		while (same_color(img[base_coords[1]][base_coords[0] + dx], self.white)):
+			dx += 1
+
+		while (not same_color(img[base_coords[1]][base_coords[0] + dx], self.white)):
+			dx += 1
+
+		for displacement in range(-2, 3):
+			for displacement_y in range(-2, 3):
+				img[min(y_len - 1, base_coords[1] + displacement_y)][min(x_len - 1, base_coords[0] + dx + displacement)] = [255, 0, 0]
+
+		base_coords
+
+		cv2.imshow('asdf', img)
+		cv2.waitKey(0)
+
+
 
 class ScreenLocate(QtWidgets.QWidget):
 	def __init__(self, root, coords, capturing):
