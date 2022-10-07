@@ -19,11 +19,37 @@ REFRESH_RATE = 15
 
 run_ai = False
 
-def same_color(a, b):
-	ans = True
+def differ(a, b):
+	total = 0
 	for i in range(len(a)):
-		ans &= a[i] == b[i]
-	return ans
+		total += abs(a[i] - b[i])
+	return total
+
+def same_color(a, b, threshold = 20):
+	return differ(a, b) < threshold
+
+piece_color = {
+	'L': [51, 100, 180],
+	'I': [131, 178, 49],
+	'S': [52, 164, 122],
+	'Z': [59, 52, 180],
+	'O': [51, 154, 180],
+	'J': [164, 61, 78],
+	'b_X': [0, 0, 0]
+}
+
+def get_piece(color, mode):
+	best_piece = 'X'
+	best_dist = 10000
+	for k, v in piece_color.items():
+		if best_dist > differ(v, color):
+			best_piece = k
+			best_dist = differ(v, color)
+	
+	if mode == 'gray':
+		return len(best_piece) == 1
+	else:
+		return best_piece
 
 
 def rgb_hack(rgb):
@@ -32,7 +58,8 @@ def rgb_hack(rgb):
 def sync_AI(coords):
 	count = 0
 	img_pro = ImageProcessor(None, coords)
-	img_pro.analyze()
+	img_pro.wait_go()
+	# img_pro.analyze()
 	# time.sleep(1 / REFRESH_RATE)
 
 def thread_AI(coords):
@@ -192,9 +219,15 @@ class ImageProcessor():
 		self.white = self._get_white()
 
 		return final
+	
+	def wait_go(self):
+		while cv2.waitKey(5) and 0Xff == ord('q'):
+			img = np.array(ImageGrab.grab(bbox=self.coords))
+
+			time.sleep(1 / REFRESH_RATE)
 
 	def analyze(self):
-		img = ImageGrab.grab(bbox=self.coords)
+		img = np.array(ImageGrab.grab(bbox=self.coords))
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
 		dim, x_len, y_len = img.shape[::-1]
@@ -216,19 +249,32 @@ class ImageProcessor():
 		while (same_color(img[base_coords[1]][base_coords[0] + dx], self.white)):
 			dx += 1
 
-		while (not same_color(img[base_coords[1]][base_coords[0] + dx], self.white)):
+		board_start = [int(base_coords[0] + dx), int(base_coords[1])]
+
+		while (not same_color(img[base_coords[1] + 3][base_coords[0] + dx], self.white, 80)):
 			dx += 1
+			print(img[base_coords[1] + 3][base_coords[0] + dx])
 
-		for displacement in range(-2, 3):
-			for displacement_y in range(-2, 3):
-				img[min(y_len - 1, base_coords[1] + displacement_y)][min(x_len - 1, base_coords[0] + dx + displacement)] = [255, 0, 0]
+		board_end = [int(base_coords[0] + dx), y_len - 1]
 
-		base_coords
+		block_size = int(
+			np.mean([
+				(board_end[1] - board_start[1]) / 20,
+				(board_end[0] - board_start[0]) / 10
+			])
+		)
 
-		cv2.imshow('asdf', img)
-		cv2.waitKey(0)
+		board = [[0 for i in range(10)] for j in range(20)]
+		for i in range(int(block_size / 2) + board_start[0], board_end[0], block_size):
+			for j in range(int(block_size / 2) + board_start[1], board_end[1], block_size):
+				i_block = (i - board_start[0]) // block_size
+				j_block = (j - board_start[1]) // block_size
+				board[j_block][i_block] = int(get_piece(img[j][i], mode='gray'))
 
+		for row in board:
+			print("".join(list(map(str, row))))
 
+		board_end[0]
 
 class ScreenLocate(QtWidgets.QWidget):
 	def __init__(self, root, coords, capturing):
