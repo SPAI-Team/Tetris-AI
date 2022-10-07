@@ -1,5 +1,7 @@
+from itertools import count
 import sys
 from turtle import done
+from unittest import case
 from PyQt5 import QtWidgets, QtCore, QtGui
 import tkinter as tk
 from PIL import ImageGrab
@@ -16,6 +18,7 @@ ct.set_appearance_mode("System")
 ct.set_default_color_theme('blue')
 
 REFRESH_RATE = 15
+DEBUG = False
 
 run_ai = False
 
@@ -29,25 +32,33 @@ def same_color(a, b, threshold = 20):
 	return differ(a, b) < threshold
 
 piece_color = {
-	'L': [51, 100, 180],
-	'I': [131, 178, 49],
-	'S': [52, 164, 122],
-	'Z': [59, 52, 180],
-	'O': [51, 154, 180],
-	'J': [164, 61, 78],
-	'b_X': [0, 0, 0]
+	'L': [43, 114, 230],
+	'I': [159, 228, 42], 
+	'S': [43, 229, 159],
+	'Z': [55, 45, 230],
+	'O': [43, 193, 229],
+	'J': [207, 59, 84],
+	'T': [193, 60, 207],
+	'X': [0, 0, 0]
 }
 
-def get_piece(color, mode):
+def is_gray(color):
+	return np.mean([
+		abs(color[0] - color[1]),
+		abs(color[1] - color[2]),
+		abs(color[0] - color[2])
+	]) < 5
+
+def get_piece(color, mode = 'normal', threshold = 60):
 	best_piece = 'X'
 	best_dist = 10000
 	for k, v in piece_color.items():
-		if best_dist > differ(v, color):
+		if best_dist > differ(v, color) and differ(v, color) < 200:
 			best_piece = k
 			best_dist = differ(v, color)
 	
 	if mode == 'gray':
-		return len(best_piece) == 1
+		return (best_piece == 'X') and not is_gray(color)
 	else:
 		return best_piece
 
@@ -56,11 +67,14 @@ def rgb_hack(rgb):
 	return "#%02x%02x%02x" % rgb  
 
 def sync_AI(coords):
-	count = 0
 	img_pro = ImageProcessor(None, coords)
 	img_pro.wait_go()
-	# img_pro.analyze()
-	# time.sleep(1 / REFRESH_RATE)
+	if (DEBUG):
+		img_pro.analyze()
+	else:
+		while run_ai:
+			img_pro.analyze()
+			time.sleep(1 / REFRESH_RATE)
 
 def thread_AI(coords):
 	t1 = threading.Thread(target = lambda: sync_AI(coords))
@@ -73,7 +87,7 @@ class MainApp(ct.CTk):
 		self.title("SPAI Tetris Bot v0.1")
 		self.geometry('300x500')
 
-		self.statuses = [['Not initialized', rgb_hack((100, 100, 100))], ['Waiting for "GO"', rgb_hack((195, 150, 10))], ['Stopped', rgb_hack((230, 60, 70))]] 
+		self.statuses = [['Not initialized', rgb_hack((100, 100, 100))], ['Ready', rgb_hack((50, 200, 80))], ['Running', rgb_hack((10, 100, 205))]]
 
 		self.coords = [None, None, None, None]
 		self.abs_c = [None, None, None, None]
@@ -87,11 +101,11 @@ class MainApp(ct.CTk):
 		self.text_foreground = 'black'
 		self.text_background='white'
 
-		status = ct.CTkLabel(self, text = 'Status:', text_font='monospace')
-		status.place(relx = 0.5, rely = 0.1, anchor = tk.CENTER)
+		status_title = ct.CTkLabel(self, text = 'Status:', text_font='monospace')
+		status_title.place(relx = 0.5, rely = 0.1, anchor = tk.CENTER)
 
-		status = ct.CTkLabel(self, text = self.statuses[0][0], text_color = self.statuses[0][1])
-		status.place(relx = 0.5, rely = 0.144, anchor = tk.CENTER)
+		self.status = ct.CTkLabel(self, text = self.statuses[0][0], text_color = self.statuses[0][1])
+		self.status.place(relx = 0.5, rely = 0.144, anchor = tk.CENTER)
 
 		button = ct.CTkButton(self, text='Screen Locate', command=self.screen_locate)
 		button.place(relx = 0.5, rely = 0.3, anchor=tk.CENTER)
@@ -110,12 +124,19 @@ class MainApp(ct.CTk):
 		run_ai = self.start
 		thread_AI(self.coords)
 		if self.start:
+			self.set_status('running')
 			self.button.configure(fg_color = rgb_hack((238, 154, 154)), text="Stop")
 		else:
+			self.set_status('ready')
 			self.button.configure(fg_color = rgb_hack((193, 237, 172)), text="Start")
+
+	def set_status(self, state):
+		states = ['not init', 'ready', 'running']
+		self.status.configure(text = self.statuses[states.index(state)][0], text_color = self.statuses[states.index(state)][1])
 	
 	def screen_locate(self):
 		self.locate.show()
+		self.set_status('ready')
 
 	def get_locate(self):
 		img = ImageGrab.grab(bbox=self.coords)
@@ -218,12 +239,33 @@ class ImageProcessor():
 		
 		self.white = self._get_white()
 
+
 		return final
 	
 	def wait_go(self):
-		while cv2.waitKey(5) and 0Xff == ord('q'):
-			img = np.array(ImageGrab.grab(bbox=self.coords))
+		img = np.array(ImageGrab.grab(bbox=self.coords))
+		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
+		dim, x_len, y_len = img.shape[::-1]
+
+		go_y = int((345 / 727) * y_len)
+		go_x = list(map(int, [
+			(251 / 696) * x_len,
+			(284 / 696) * x_len,
+			(350 / 696) * x_len,
+			(416 / 696) * x_len
+		]))
+
+
+		while True:
+			img = np.array(ImageGrab.grab(bbox=self.coords))
+			img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+			go_check_count = 0
+			for val in go_x:
+				go_check_count += differ(img[go_y][val], [5, 199, 255]) < 20
+			
+			if go_check_count >= 3:
+				break
 			time.sleep(1 / REFRESH_RATE)
 
 	def analyze(self):
@@ -251,12 +293,16 @@ class ImageProcessor():
 
 		board_start = [int(base_coords[0] + dx), int(base_coords[1])]
 
-		while (not same_color(img[base_coords[1] + 3][base_coords[0] + dx], self.white, 80)):
+		while (not same_color(img[base_coords[1] + 3][base_coords[0] + dx], self.white, 120)):
 			dx += 1
-			print(img[base_coords[1] + 3][base_coords[0] + dx])
 
 		board_end = [int(base_coords[0] + dx), y_len - 1]
+		if board_end[0] > (390 / 515 * x_len - 1):
+			board_end[0] = int(board_end[0] * 0.95)
 
+		img[board_end[1]][board_end[0]] = [255, 0, 0]
+		img[board_start[1]][board_start[0]] = [255, 0, 0]
+		
 		block_size = int(
 			np.mean([
 				(board_end[1] - board_start[1]) / 20,
@@ -271,10 +317,41 @@ class ImageProcessor():
 				j_block = (j - board_start[1]) // block_size
 				board[j_block][i_block] = int(get_piece(img[j][i], mode='gray'))
 
+		## Current Piece
+		pieces = []
+		for x_dm in range(3, 6):
+			p_x = board_start[0] + block_size * x_dm + int(block_size / 2)
+			for y_dm in range(2):
+				p_y = board_start[1] - block_size * y_dm - int(block_size / 2)
+				extracted_piece = get_piece(img[p_y][p_x])
+				pieces.append(None if extracted_piece == 'X' else extracted_piece)
+
+		piece = None
+		for p in pieces:
+			piece = piece or p
+
+		## Next Piece
+		next_pieces = []
+		for x_dm in range(2, 5):
+			p_x = int(board_end[0] + x_dm * block_size + int(block_size / 2) - (5 / 696) * x_len)
+			for y_dm in range(2, 4):
+				p_y = int(board_start[1] + y_dm * block_size - (4 / 727) * y_len)
+				# img[p_y][p_x] = [255, 0, 0]
+				print(img[p_y][p_x])
+				extracted_piece = get_piece(img[p_y][p_x])
+				next_pieces.append(None if extracted_piece == 'X' else extracted_piece)
+		
+		next_piece = None
+		for p in next_pieces:
+			next_piece = next_piece or p
+
+		print('----------')
+		print('Current:', piece, ' | Next:', next_piece)
 		for row in board:
 			print("".join(list(map(str, row))))
 
-		board_end[0]
+
+
 
 class ScreenLocate(QtWidgets.QWidget):
 	def __init__(self, root, coords, capturing):
