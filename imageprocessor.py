@@ -211,16 +211,16 @@ class ImageProcessor():
 				extracted_piece = get_piece(img[p_y][p_x], context='next_piece', threshold=120)
 				next_pieces.append(None if extracted_piece == 'X' else extracted_piece)
 
-		# cv2.imshow('img', copy_img)
-		# cv2.waitKey(0)
-		
 		next_piece = None
 		for p in next_pieces:
 			next_piece = next_piece or p
 		if next_piece == None:
 			next_piece = 'I'
 
-		print('----------')
-		print('Current:', piece, ' | Next:', next_piece)
-		for row in board:
-			print("".join(list(map(str, row))))
+		if not DEBUG:
+			print('----------')
+			print('Current:', piece, ' | Next:', next_piece)
+			for row in board:
+				print("".join(list(map(str, row))))
+		
+		return board, piece, next_piece
