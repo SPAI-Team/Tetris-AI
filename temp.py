@@ -13,6 +13,7 @@ import customtkinter as ct
 import tkinter.messagebox as msg
 import threading
 import time
+import copy
 
 ct.set_appearance_mode("System")
 ct.set_default_color_theme('blue')
@@ -42,6 +43,13 @@ piece_color = {
 	'X': [0, 0, 0]
 }
 
+next_piece_color = copy.deepcopy(piece_color)
+next_piece_color['O'] = [50, 117, 133]
+next_piece_color['T'] = [139, 62, 148]
+next_piece_color['S'] = [49, 179, 130]
+next_piece_color['L'] = [50, 100, 180]
+next_piece_color['Z'] = [58, 51, 179]
+
 def is_gray(color):
 	return np.mean([
 		abs(color[0] - color[1]),
@@ -49,16 +57,20 @@ def is_gray(color):
 		abs(color[0] - color[2])
 	]) < 5
 
-def get_piece(color, mode = 'normal', threshold = 60):
+def get_piece(color, mode = 'normal', threshold = 60, context = 'piece'):
+	if context == 'piece':
+		color_dict = piece_color
+	else:
+		color_dict = next_piece_color
 	best_piece = 'X'
 	best_dist = 10000
-	for k, v in piece_color.items():
-		if best_dist > differ(v, color) and differ(v, color) < 200:
+	for k, v in color_dict.items():
+		if best_dist > differ(v, color) and differ(v, color) < threshold:
 			best_piece = k
 			best_dist = differ(v, color)
 	
 	if mode == 'gray':
-		return (best_piece == 'X') and not is_gray(color)
+		return (best_piece != 'X') and not is_gray(color)
 	else:
 		return best_piece
 
@@ -268,6 +280,19 @@ class ImageProcessor():
 				break
 			time.sleep(1 / REFRESH_RATE)
 
+		print('first pass')
+		
+		while True:
+			img = np.array(ImageGrab.grab(bbox=self.coords))
+			img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+			go_check_count = 0
+			for val in go_x:
+				go_check_count += differ(img[go_y][val], [0, 0, 0]) < 50
+			
+			if go_check_count >= 3:
+				break
+			time.sleep(1 / REFRESH_RATE)
+
 	def analyze(self):
 		img = np.array(ImageGrab.grab(bbox=self.coords))
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
@@ -310,12 +335,15 @@ class ImageProcessor():
 			])
 		)
 
+		copy_img = copy.deepcopy(img)
+
 		board = [[0 for i in range(10)] for j in range(20)]
 		for i in range(int(block_size / 2) + board_start[0], board_end[0], block_size):
 			for j in range(int(block_size / 2) + board_start[1], board_end[1], block_size):
 				i_block = (i - board_start[0]) // block_size
 				j_block = (j - board_start[1]) // block_size
-				board[j_block][i_block] = int(get_piece(img[j][i], mode='gray'))
+				copy_img[j][i] = [255, 0, 0]
+				board[j_block][i_block] = int(get_piece(img[j][i], mode='gray', threshold=120))
 
 		## Current Piece
 		pieces = []
@@ -323,12 +351,15 @@ class ImageProcessor():
 			p_x = board_start[0] + block_size * x_dm + int(block_size / 2)
 			for y_dm in range(2):
 				p_y = board_start[1] - block_size * y_dm - int(block_size / 2)
+				copy_img[p_y][p_x] = [255, 0, 0]
 				extracted_piece = get_piece(img[p_y][p_x])
 				pieces.append(None if extracted_piece == 'X' else extracted_piece)
 
 		piece = None
 		for p in pieces:
 			piece = piece or p
+			
+
 
 		## Next Piece
 		next_pieces = []
@@ -336,14 +367,19 @@ class ImageProcessor():
 			p_x = int(board_end[0] + x_dm * block_size + int(block_size / 2) - (5 / 696) * x_len)
 			for y_dm in range(2, 4):
 				p_y = int(board_start[1] + y_dm * block_size - (4 / 727) * y_len)
-				# img[p_y][p_x] = [255, 0, 0]
+				copy_img[p_y][p_x] = [255, 0, 0]
 				print(img[p_y][p_x])
-				extracted_piece = get_piece(img[p_y][p_x])
+				extracted_piece = get_piece(img[p_y][p_x], context='next_piece', threshold=120)
 				next_pieces.append(None if extracted_piece == 'X' else extracted_piece)
+
+		# cv2.imshow('img', copy_img)
+		# cv2.waitKey(0)
 		
 		next_piece = None
 		for p in next_pieces:
 			next_piece = next_piece or p
+		if next_piece == None:
+			next_piece = 'I'
 
 		print('----------')
 		print('Current:', piece, ' | Next:', next_piece)
