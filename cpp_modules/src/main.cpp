@@ -116,15 +116,24 @@ std::string mainProcess(char const *inputStr, RequestType requestType) {
 	}
 }
 
-int main(){
-	printf("Starting...\n");
-	std::string result = mainProcess(
-		"0000000000000000000000000000000000000000000000000000000000000000001110000000111000000011110000"
-		"0111110000011110000011111100011101110011101110001111111000111111100111111110011111111001111111"
-		"101111111110|18|4|0|0|X...|"
-		,
-		RequestType()
-		);
-	printf("%s\n", result.c_str());
-	printf("Done!\n");
+extern "C" {
+	__declspec(dllexport) int adding(int a, int b) {
+		return a + b;
+		// return mainProcess(
+		// 	inp,
+		// 	RequestType()
+		// );
+	}
 }
+// int main(){
+// 	printf("Starting...\n");
+// 	std::string result = mainProcess(
+// 		"0000000000000000000000000000000000000000000000000000000000000000001110000000111000000011110000"
+// 		"0111110000011110000011111100011101110011101110001111111000111111100111111110011111111001111111"
+// 		"101111111110|18|4|0|0|X...|"
+// 		,
+// 		RequestType()
+// 		);
+// 	printf("%s\n", result.c_str());
+// 	printf("Done!\n");
+// }
