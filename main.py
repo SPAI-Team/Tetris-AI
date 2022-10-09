@@ -102,28 +102,30 @@ def sync_AI(coords):
 	'''
 	trans = Translator()
 	img_pro = ImageProcessor(coords)
+
+	img = np.array(ImageGrab.grab(bbox = coords))
+	img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+
+	print('overhere')
+	img_pro.quick_setup()
+	piece = img_pro.get_cur(img)
+	next_piece = img_pro.get_next(img)
 	img_pro.wait_go()
-	if (DEBUG):
-		board, piece, next_piece = img_pro.analyze(empty_board = True)
+	print('wait is done')
+	first_time = 2
+	img = np.array(ImageGrab.grab(bbox = coords))
+	img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+	while run_ai:
+		board = img_pro.get_board(img, empty_board = first_time)
+		if first_time > 0:
+			first_time -= 1
 		x_move, rotation = trans.get_best_move(board, piece, next_piece)
+		piece = next_piece
+		next_piece = img_pro.get_next(img)
 		trans.perform_move(x_move, rotation)
-	else:
-		first_time = True
-		count = 0
-		move_time = 0
-		while run_ai:
-			board, piece, next_piece = img_pro.analyze(empty_board = first_time)
-			count += 1
-			first_time = False
-			start = time.time()
-			x_move, rotation = trans.get_best_move(board, piece, next_piece)
-			end = time.time()
-			print('first:', end - start)
-			start = time.time()
-			trans.perform_move(x_move, rotation)
-			end = time.time()
-			print('second:', end - start)
-			time.sleep(1 / REFRESH_RATE)
+		img = np.array(ImageGrab.grab(bbox = coords))
+		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+		time.sleep(1 / PLAY_REFRESH_RATE)
 
 def thread_AI(coords):
 	'''
