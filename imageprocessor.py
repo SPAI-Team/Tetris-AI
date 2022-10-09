@@ -66,16 +66,15 @@ class ImageProcessor():
 				coords['top_right'] = [i, coords['top_left'][1]]
 				break
 	
-		img_copy = copy.deepcopy(img)
-		dx = 0
-		while (gray[coords['top_left'][1]][coords['top_left'][0] + dx] == white):
-			dx += 1
+		mid = int((coords['top_left'][0] + coords['top_right'][0]) / 2)
+		bottom_y = 0
+		for j in range(y_len - 1, 0, -1):
+			if gray[j][mid] == white:
+				bottom_y = j
+				break
+		# img_copy = copy.deepcopy(img)
 
-		dy = 0
-		while (gray[coords['top_left'][1] + dy][coords['top_left'][0] + dx + 3] != white):
-			dy += 1
-
-		coords['bottom_right'] = [coords['top_right'][0], coords['top_left'][1] + dy]
+		coords['bottom_right'] = [coords['top_right'][0], bottom_y]
 
 		for dx in range(-2, 3):
 			for dy in range(-2, 3):

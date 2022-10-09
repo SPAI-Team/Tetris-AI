@@ -12,7 +12,7 @@ class Translator():
             'I': {
                 'id': 0,
                 'x_bias': -3,
-                'rotation_bias': 0
+                'rotation_bias': 0,
             },
             'O': {
                 'id': 1,
@@ -70,16 +70,21 @@ class Translator():
         return x_move, rotation
 
     def perform_move(self, x_move, rotation):
-        multiplier = 0.01
+        multiplier = 0.0
+        pause = False
+        rotation = rotation % 4
+        if abs(rotation - 4) < rotation:
+            rotation = rotation - 4
+
         if rotation < 0:
-            pyautogui.press('z', presses = abs(rotation), interval=np.random.random() * multiplier)
+            pyautogui.press('z', presses = abs(rotation), interval=np.random.random() * multiplier, _pause=pause)
         else:
-            pyautogui.press('up', presses = abs(rotation), interval=np.random.random() * multiplier)
+            pyautogui.press('up', presses = abs(rotation), interval=np.random.random() * multiplier, _pause=pause)
         
         if x_move < 0:
-            pyautogui.press('left', presses = abs(x_move), interval=np.random.random() * multiplier)
+            pyautogui.press('left', presses = abs(x_move), interval=np.random.random() * multiplier, _pause=pause)
         else:
-            pyautogui.press('right', presses = abs(x_move), interval=np.random.random() * multiplier)
+            pyautogui.press('right', presses = abs(x_move), interval=np.random.random() * multiplier, _pause=pause)
         
         pyautogui.press('space')
 
