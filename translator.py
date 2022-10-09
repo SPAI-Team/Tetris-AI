@@ -1,31 +1,42 @@
+from subprocess import Popen, check_output, check_call, PIPE, call, run, STDOUT
 import ctypes	
 import os
 import sys
 
-dirname = os.path.dirname(sys.argv[0])
-dll = ctypes.CDLL(dirname + "\\cpp_modules\\src\\main.so")
-# pathToWin32Environment = os.getcwd() + "/environment-win32/libmagic/"
-# pathToDll = pathToWin32Environment + "magic1.dll"
-# if not os.path.exists(pathToDll):
-#     #Give up if none of the above succeeded:
-#     raise Exception('Could not locate ' + pathToDll)
-# curr_dir_before = os.getcwd()
-# os.chdir(pathToWin32Environment)
-# libmagic = ctypes.CDLL('magic1.dll')
+class Translator():
+    def __init__():
+        pass
 
-# test = open('C:/Users/kenne/Documents/GitHub/tetris-ai/cpp_modules/src/masdf.so', 'r')
+    def encode_details(board, ):
+        pass
 
-# class Translator():
-# 	def __init__():
-# 		pass
-	
-# 	def assess(self, board, piece, next_piece):
-		
-# 		pass
-# class Translator():
-# 	def __init__():
-# 		pass
-	
-# 	def assess(self, board, piece, next_piece):
-		
-# 		pass
+    def pass_info():
+        pass
+
+os.chdir(
+    os.path.abspath(os.path.dirname(__file__))
+)
+
+
+cur = ""
+p = run(['cpp_modules/src/main.exe'], stdout=PIPE,
+        input='00000000000000000000000000000000000000000000000000000000000000000011100000001110000000111100000111110000011110000011111100011101110011101110001111111000111111100111111110011111111001111111101111111110|18|4|0|0|X...|', encoding='ascii')
+print(p.stdout)
+for i, v in enumerate("00000000000000000000000000000000000000000000000000000000000000000011100000001110000000111100000111110000011110000011111100011101110011101110001111111000111111100111111110011111111001111111101111111110"):
+    if (i % 10 == 0):
+        print(cur)
+        cur = v
+    else:
+        cur += v
+# for i in range(200):
+
+
+
+# p = Popen(['cpp_modules/src/main.exe'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+# grep_stdout = p.communicate(input=b'5')[0]
+# print(grep_stdout)
+# f.seek(0)
+# content = f.read()
+# print(content)
+# stdout_data = process.communicate(input=b'5')[0]
+# print(stdout_data)

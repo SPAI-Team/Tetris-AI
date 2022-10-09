@@ -1,10 +1,9 @@
-#include <boost/python.hpp>
+#include <bits/stdc++.h>
 
-int adder(int a, int b) {
-	return a + b;
-}
+using namespace std;
 
-BOOST_PYTHON_MODULE(hello_ext) {
-	using namespace boost::python;
-	def ('adder', adder)
+int main() {
+	string a;
+	cin >> a;
+	cout << "fuck" << endl;
 }

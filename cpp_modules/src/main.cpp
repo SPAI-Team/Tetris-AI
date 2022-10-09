@@ -35,22 +35,21 @@ std::string mainProcess(char const *inputStr, RequestType requestType) {
 	Piece curPiece;
 	Piece nextPiece;
 	std::string inputFrameTimeline;
+
+	// Loop through the other args
+	std::string s = std::string(inputStr + 201); // 201 = the length of the board string + 1 for the delimiter
 	for (int i = 0; i < 20; i++) {
 		for (int j = 0; j < 10; j++) {
 			std::cout << inputStr[i * 10 + j];
 		}
 		cout << "\n";
 	}
-
-	// Loop through the other args
-	std::string s = std::string(inputStr + 201); // 201 = the length of the board string + 1 for the delimiter
 	std::string delim = "|";
 	auto start = 0U;
 	auto end = s.find(delim);
 	for (int i = 0; end != std::string::npos; i++) {
 		std::string arg = s.substr(start, end - start);
 		int argAsInt = atoi(arg.c_str());
-		std::cout << arg.c_str() << "\n";
 		maybePrint("ARG %d: %d\n", i, argAsInt);
 		switch (i) {
 		case 0:
@@ -125,15 +124,15 @@ extern "C" {
 		// );
 	}
 }
-// int main(){
-// 	printf("Starting...\n");
-// 	std::string result = mainProcess(
-// 		"0000000000000000000000000000000000000000000000000000000000000000001110000000111000000011110000"
-// 		"0111110000011110000011111100011101110011101110001111111000111111100111111110011111111001111111"
-// 		"101111111110|18|4|0|0|X...|"
-// 		,
-// 		RequestType()
-// 		);
-// 	printf("%s\n", result.c_str());
-// 	printf("Done!\n");
-// }
+int main(){
+	char* s = static_cast<char*>(calloc(255,sizeof(char)));
+	scanf("%255s",s);
+	std::string result = mainProcess(
+		s
+		,
+		RequestType()
+		);
+	printf("%s\n", result.c_str());
+}
+
+// 00000000000000000000000000000000000000000000000000000000000000000011100000001110000000111100000111110000011110000011111100011101110011101110001111111000111111100111111110011111111001111111101111111110|18|4|0|0|X...|
