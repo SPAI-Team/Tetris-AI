@@ -18,7 +18,6 @@ ct.set_default_color_theme('blue')
 
 run_ai = False
 
-
 class MainApp(ct.CTk):
 	'''
 		Main Tkinter App

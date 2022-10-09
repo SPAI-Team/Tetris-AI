@@ -1,2 +1,2 @@
 REFRESH_RATE = 5
-DEBUG = False
+DEBUG = True
