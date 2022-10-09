@@ -109,12 +109,23 @@ def sync_AI(coords):
 		trans.perform_move(x_move, rotation)
 	else:
 		first_time = True
+		count = 0
+		analyze_time = 0
+		move_time = 0
 		while run_ai:
+			start = time.time()
 			board, piece, next_piece = img_pro.analyze(empty_board = first_time)
+			end = time.time()
+			analyze_time += end - start
+			count += 1
 			first_time = False
+			start = time.time()
 			x_move, rotation = trans.get_best_move(board, piece, next_piece)
 			trans.perform_move(x_move, rotation)
-			time.sleep(1 / REFRESH_RATE)
+			end = time.time()
+			move_time = end - start
+			print(analyze_time / count, move_time / count)
+			# time.sleep(1 / REFRESH_RATE)
 
 def thread_AI(coords):
 	'''
