@@ -270,18 +270,16 @@ std::string getLockValueLookupEncoded(GameState gameState, const Piece *firstPie
     }
   }
 
-  // Encode lookup to JSON
+  std::string best_move = "";
+  int best_score = -3000;
   std::string mapEncoded = std::string("{");
   for( const auto& n : lockValueMap ) {
-    char mapEntryBuf[30];
-    sprintf(mapEntryBuf, "\"%s\":%.2f,", n.first.c_str(), n.second - MAP_OFFSET);
-    mapEncoded.append(mapEntryBuf);
+    if (n.second - MAP_OFFSET > best_score) {
+      best_move = n.first.c_str();
+      best_score = n.second - MAP_OFFSET;
+    }
   }
-  if (lockValueMap.size() > 0) {
-    mapEncoded.pop_back(); // Remove the last comma
-  }
-  mapEncoded.append("}");
-  return mapEncoded;
+  return best_move;
 }
 
 

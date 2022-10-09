@@ -1,0 +1,27 @@
+## T
+x_bias = -2
+rotation_bias = +2
+
+## I
+x_bias = -3
+rotation_bias = 0
+
+## O
+x_bias = -3
+rotation_bias = 0
+
+## L
+x_bias = -2
+rotation_bias = +2
+
+## Z
+x_bias = -2
+rotation_bias = 0
+
+## J
+x_bias = -2
+rotation_bias = +2
+
+## S
+x_bias = -2
+rotation_bias = 0

@@ -38,12 +38,12 @@ std::string mainProcess(char const *inputStr, RequestType requestType) {
 
 	// Loop through the other args
 	std::string s = std::string(inputStr + 201); // 201 = the length of the board string + 1 for the delimiter
-	for (int i = 0; i < 20; i++) {
-		for (int j = 0; j < 10; j++) {
-			std::cout << inputStr[i * 10 + j];
-		}
-		cout << "\n";
-	}
+	// for (int i = 0; i < 20; i++) {
+	// 	for (int j = 0; j < 10; j++) {
+	// 		std::cout << inputStr[i * 10 + j];
+	// 	}
+	// 	cout << "\n";
+	// }
 	std::string delim = "|";
 	auto start = 0U;
 	auto end = s.find(delim);

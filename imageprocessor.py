@@ -120,20 +120,9 @@ class ImageProcessor():
 				break
 			time.sleep(1 / REFRESH_RATE)
 
-		print('first pass')
-		
-		while True:
-			img = np.array(ImageGrab.grab(bbox=self.coords))
-			img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
-			go_check_count = 0
-			for val in go_x:
-				go_check_count += differ(img[go_y][val], [0, 0, 0]) < 50
-			
-			if go_check_count >= 3:
-				break
-			time.sleep(1 / REFRESH_RATE)
+		time.sleep(0.2)
 
-	def analyze(self):
+	def analyze(self, empty_board = False):
 		img = np.array(ImageGrab.grab(bbox=self.coords))
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
@@ -175,15 +164,13 @@ class ImageProcessor():
 			])
 		)
 
-		copy_img = copy.deepcopy(img)
-
 		board = [[0 for i in range(10)] for j in range(20)]
-		for i in range(int(block_size / 2) + board_start[0], board_end[0], block_size):
-			for j in range(int(block_size / 2) + board_start[1], board_end[1], block_size):
-				i_block = (i - board_start[0]) // block_size
-				j_block = (j - board_start[1]) // block_size
-				copy_img[j][i] = [255, 0, 0]
-				board[j_block][i_block] = int(get_piece(img[j][i], mode='gray', threshold=120))
+		if (not empty_board):
+			for i in range(int(block_size / 2) + board_start[0], board_end[0], block_size):
+				for j in range(int(block_size / 2) + board_start[1], board_end[1], block_size):
+					i_block = (i - board_start[0]) // block_size
+					j_block = (j - board_start[1]) // block_size
+					board[j_block][i_block] = int(get_piece(img[j][i], mode='gray', threshold=120))
 
 		## Current Piece
 		pieces = []
@@ -191,7 +178,6 @@ class ImageProcessor():
 			p_x = board_start[0] + block_size * x_dm + int(block_size / 2)
 			for y_dm in range(2):
 				p_y = board_start[1] - block_size * y_dm - int(block_size / 2)
-				copy_img[p_y][p_x] = [255, 0, 0]
 				extracted_piece = get_piece(img[p_y][p_x])
 				pieces.append(None if extracted_piece == 'X' else extracted_piece)
 
@@ -206,8 +192,6 @@ class ImageProcessor():
 			p_x = int(board_end[0] + x_dm * block_size + int(block_size / 2) - (5 / 696) * x_len)
 			for y_dm in range(2, 4):
 				p_y = int(board_start[1] + y_dm * block_size - (4 / 727) * y_len)
-				copy_img[p_y][p_x] = [255, 0, 0]
-				print(img[p_y][p_x])
 				extracted_piece = get_piece(img[p_y][p_x], context='next_piece', threshold=120)
 				next_pieces.append(None if extracted_piece == 'X' else extracted_piece)
 
@@ -217,7 +201,7 @@ class ImageProcessor():
 		if next_piece == None:
 			next_piece = 'I'
 
-		if not DEBUG:
+		if DEBUG:
 			print('----------')
 			print('Current:', piece, ' | Next:', next_piece)
 			for row in board:

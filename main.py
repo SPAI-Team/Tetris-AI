@@ -7,11 +7,17 @@ import numpy as np
 import customtkinter as ct
 import threading
 import time
+from translator import Translator
 from imageprocessor import ImageProcessor
 from screenlocate import ScreenLocate
 from config import *
+import os
 
 from utils import *
+
+os.chdir(
+    os.path.abspath(os.path.dirname(__file__))
+)
 
 ct.set_appearance_mode("light")
 ct.set_default_color_theme('blue')
@@ -94,18 +100,25 @@ def sync_AI(coords):
 	'''
 		Synchronous AI Loop
 	'''
+	trans = Translator()
 	img_pro = ImageProcessor(coords)
 	img_pro.wait_go()
 	if (DEBUG):
-		img_pro.analyze()
+		board, piece, next_piece = img_pro.analyze(empty_board = True)
+		x_move, rotation = trans.get_best_move(board, piece, next_piece)
+		trans.perform_move(x_move, rotation)
 	else:
+		first_time = True
 		while run_ai:
-			img_pro.analyze()
+			board, piece, next_piece = img_pro.analyze(empty_board = first_time)
+			first_time = False
+			x_move, rotation = trans.get_best_move(board, piece, next_piece)
+			trans.perform_move(x_move, rotation)
 			time.sleep(1 / REFRESH_RATE)
 
 def thread_AI(coords):
 	'''
-		Threaded syncA_AI to enable non-blocking code. Otherwise, tkinter does not work.
+		Threaded sync_AI to enable non-blocking code. Otherwise, tkinter does not work.
 	'''
 	t1 = threading.Thread(target = lambda: sync_AI(coords))
 	t1.start()
