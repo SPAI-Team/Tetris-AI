@@ -1,7 +1,7 @@
 # How to use
 
 <ol>
-	<li>Run main.py</li>
+	<li>Run main.py (If 'No module named 'PyQt5' pops up, run following command: 'pip install PyQt5''</li>
 	<li>Press 'Screen Locate' and select the entire area of tetr.io</li>
 	<li>Check the processed screen by clicking on 'Show Locate'. It should include the <code>board</code>, <code>hold</code>, <code>next</code> and a little bit of blank space above the board.</li>
 	<li>Press 'Start'</li>
