@@ -115,19 +115,20 @@ class MainApp(ct.CTk):
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
 		while run_ai:
-			board = img_pro.get_board(img, empty_board = first_time)
-			if first_time > 0:
-				first_time -= 1
-			print('current:', piece)
-			print('next_piece:', next_piece)
-			x_move, rotation = trans.get_best_move(board, piece, next_piece)
-			piece = next_piece
-			next_piece = img_pro.get_next(img)
-			trans.perform_move(x_move, rotation)
-			img = np.array(ImageGrab.grab(bbox = coords))
-			img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
-			time.sleep(1 / PLAY_REFRESH_RATE)
-		# self.play_toggle()
+			try:
+				board = img_pro.get_board(img, empty_board = first_time)
+				if first_time > 0:
+					first_time -= 1
+				x_move, rotation = trans.get_best_move(board, piece, next_piece)
+				piece = next_piece
+				next_piece = img_pro.get_next(img)
+				trans.perform_move(x_move, rotation)
+				img = np.array(ImageGrab.grab(bbox = coords))
+				img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+				time.sleep(1 / PLAY_REFRESH_RATE)
+			except:
+				break
+		self.play_toggle()
 
 	def thread_AI(self, coords):
 		'''
