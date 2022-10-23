@@ -115,15 +115,6 @@ std::string mainProcess(char const *inputStr, RequestType requestType) {
 	}
 }
 
-extern "C" {
-	__declspec(dllexport) int adding(int a, int b) {
-		return a + b;
-		// return mainProcess(
-		// 	inp,
-		// 	RequestType()
-		// );
-	}
-}
 int main(){
 	char* s = static_cast<char*>(calloc(255,sizeof(char)));
 	scanf("%255s",s);

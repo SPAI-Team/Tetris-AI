@@ -157,9 +157,9 @@ class ImageProcessor():
 		
 		# cv2.imwrite('./board.jpg', copying)
 		# cv2.waitKey(0)
-		# if True:
-		# 	for row in board:
-		# 		print("".join(list(map(str, row))))
+		if True:
+			for row in board:
+				print("".join(list(map(str, row))))
 		return board
 
 		## Current Piece

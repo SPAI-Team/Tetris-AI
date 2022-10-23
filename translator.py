@@ -8,6 +8,7 @@ import numpy as np
 
 class Translator():
     def __init__(self):
+        os.system('g++ cpp_modules/src/main.cpp -o cpp_modules/src/main')
         self.piece_detail = {
             'I': {
                 'id': 0,
@@ -57,6 +58,7 @@ class Translator():
 
     def get_best_move(self, board, current_piece, next_piece):
         encoded = self.encode_details(board, current_piece, next_piece)
+        print('encoded:', encoded)
         p = run(
             ['cpp_modules/src/main.exe'],
             stdout=PIPE,
@@ -64,6 +66,7 @@ class Translator():
             encoding='ascii'
         )
         result = p.stdout.rstrip('\n')
+        print(result)
         rotation, x_move, _ = list(map(int, result.split('|')))
         x_move += self.piece_detail[current_piece]['x_bias']
         rotation += self.piece_detail[current_piece]['rotation_bias']
