@@ -91,43 +91,19 @@ class ImageProcessor():
 		
 		self.white = self._get_white()
 
-
 		return final
 
 	def quick_setup(self):
 		img = np.array(ImageGrab.grab(bbox=self.coords))
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
-		dx = 0
-		base_coords = [0, 0]
-
 		dim, x_len, y_len = img.shape[::-1]
 		self.x_len = x_len
 		self.y_len = y_len
 		
-		done_loop = False
-		for i in range(x_len):
-			for j in range(y_len):
-				if (same_color(img[j][i], self.white)):
-					base_coords[0] = i
-					base_coords[1] = j
-					done_loop = True
-					break
-			if done_loop:
-				break
-	
-		while (same_color(img[base_coords[1]][base_coords[0] + dx], self.white)):
-			dx += 1
+		self.board_start = [int(BOARD_RATIO[0][0] * self.x_len), int(BOARD_RATIO[0][1] * self.y_len)]
+		self.board_end = [int(BOARD_RATIO[1][0] * self.x_len), int(BOARD_RATIO[1][1] * self.y_len)]
 
-		self.board_start = [int(base_coords[0] + dx), int(base_coords[1])]
-
-		while (not same_color(img[base_coords[1] + 3][base_coords[0] + dx], self.white, 120)):
-			dx += 1
-
-		self.board_end = [int(base_coords[0] + dx), y_len - 1]
-		if self.board_end[0] > (390 / 515 * x_len - 1):
-			self.board_end[0] = int(self.board_end[0] * 0.95)
-		
 		self.block_size = int(
 			np.mean([
 				(self.board_end[1] - self.board_start[1]) / 20,
@@ -140,17 +116,18 @@ class ImageProcessor():
 		img = np.array(ImageGrab.grab(bbox=self.coords))
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
-		go_y = int((345 / 727) * self.y_len)
+		go_y = int((317 / 676) * self.y_len)
 		go_x = list(map(int, [
-			(251 / 696) * self.x_len,
-			(284 / 696) * self.x_len,
-			(350 / 696) * self.x_len,
-			(416 / 696) * self.x_len
+			(264 / 646) * self.x_len,
+			(288 / 646) * self.x_len,
+			(345 / 646) * self.x_len,
+			(414 / 646) * self.x_len
 		]))
 
 		while True:
 			img = np.array(ImageGrab.grab(bbox=self.coords))
 			img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+
 			go_check_count = 0
 			for val in go_x:
 				go_check_count += differ(img[go_y][val], [5, 199, 255]) < 20
@@ -163,7 +140,7 @@ class ImageProcessor():
 		img = np.array(ImageGrab.grab(bbox=self.coords))
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
-		board = [[0 for i in range(10)] for j in range(20)]
+		board = np.full((20, 10))
 		if (empty_board):
 			extra = self.block_size * 9
 		else:
@@ -171,51 +148,56 @@ class ImageProcessor():
 		
 		for i in range(self.half_block + self.board_start[0], self.board_end[0], self.block_size):
 			for j in range(self.half_block + self.board_start[1] + self.block_size * 3 + extra, self.board_end[1], self.block_size):
+				# for dis in range(-2, 3):
+				# 	for dis_y in range(-2, 3):
+				# 		copying[j + dis][i + dis_y] = [255, 0, 0]
 				i_block = math.floor((i - self.board_start[0]) / self.block_size)
 				j_block = math.floor((j - self.board_start[1]) / self.block_size)
 				board[j_block][i_block] = int(get_piece(img[j][i], mode='gray', threshold=120))
 		
-		if DEBUG:
-			for row in board:
-				print("".join(list(map(str, row))))
+		# cv2.imwrite('./board.jpg', copying)
+		# cv2.waitKey(0)
+		# if True:
+		# 	for row in board:
+		# 		print("".join(list(map(str, row))))
 		return board
 
 		## Current Piece
 	
 	def get_cur(self, img):
 		## Cur Piece
-		copying = copy.deepcopy(img)
 		pieces = []
-		for x_dm in range(2, 5):
-			p_x = int(self.board_end[0] + x_dm * self.block_size + self.half_block - (5 / 696) * self.x_len)
-			for y_dm in range(2, 4):
-				p_y = int(self.board_start[1] + y_dm * self.block_size - (4 / 727) * self.y_len)
-				extracted_piece = get_piece(img[p_y][p_x], context='next_piece', threshold=120)
-				pieces.append(None if extracted_piece == 'X' else extracted_piece)
+		for piece_coord in CUR_RATIO:
+			extracted_piece = get_piece(img[int(piece_coord[1] * self.x_len)][int(piece_coord[0] * self.x_len)], context='next_piece', threshold=120)
+			pieces.append(None if extracted_piece == 'X' else extracted_piece)
 
+		# cv2.imwrite('./current.jpg', copying)
+		# cv2.waitKey(0)
 		piece = None
 		for p in pieces:
 			piece = piece or p
 		if piece == None:
 			piece = 'I'
 
-		if DEBUG:
-			print('piece:',piece)
+		# print('piece:',piece)
 		return piece
 			
 	def get_next(self, img):
 		## Next Piece
 		next_pieces = []
-		for x_dm in range(2, 5):
-			p_x = int(self.board_end[0] + x_dm * self.block_size + self.half_block - (5 / 696) * self.x_len)
-			for y_dm in range(5, 7):
-				p_y = int(self.board_start[1] + y_dm * self.block_size - (4 / 727) * self.y_len)
-				extracted_piece = get_piece(img[p_y][p_x], context='next_piece', threshold=120)
-				next_pieces.append(None if extracted_piece == 'X' else extracted_piece)
+		for piece_coord in NEXT_RATIO:
+			p_y = int(piece_coord[1] * self.y_len)
+			p_x = int(piece_coord[0] * self.x_len)
+			extracted_piece = get_piece(img[p_y][p_x], context='next_piece', threshold=120)
+			next_pieces.append(None if extracted_piece == 'X' else extracted_piece)
 
+		# cv2.imwrite(f'./next{time.time()}.jpg', copying)
+		# cv2.waitKey(0)
 		next_piece = None
 		for p in next_pieces:
 			next_piece = next_piece or p
 		if next_piece == None:
 			next_piece = 'I'
 		
+		print('next_piece', next_piece)
+		return next_piece

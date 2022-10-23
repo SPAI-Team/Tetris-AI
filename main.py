@@ -106,12 +106,10 @@ def sync_AI(coords):
 	img = np.array(ImageGrab.grab(bbox = coords))
 	img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
-	print('overhere')
 	img_pro.quick_setup()
 	piece = img_pro.get_cur(img)
 	next_piece = img_pro.get_next(img)
 	img_pro.wait_go()
-	print('wait is done')
 	first_time = 2
 	img = np.array(ImageGrab.grab(bbox = coords))
 	img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)

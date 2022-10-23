@@ -45,13 +45,14 @@ def get_piece(color: list, mode: str = 'normal', threshold: int = 60, context: s
 	best_piece = 'X'
 	best_dist = 10000
 	for k, v in color_dict.items():
-		if best_dist > differ(v, color) and differ(v, color) < threshold:
+		difference = differ(v, color)
+		if best_dist > difference and difference < threshold:
 			best_piece = k
-			best_dist = differ(v, color)
+			best_dist = difference
 	
 	if mode == 'gray':
 		# Return 1 if it is a valid piece, otherwise 0 (no piece).
-		return (best_piece != 'X') and not is_gray(color)
+		return not (differ(color, np.array([0, 0, 0])) < 10)
 
 	elif mode == 'normal':
 		# Return the name of the piece
@@ -76,10 +77,7 @@ def differ(a: list, b: list):
 	*a* -> the first color
 	*b* -> the second color
 	'''
-	total = 0
-	for i in range(len(a)):
-		total += abs(a[i] - b[i])
-	return total
+	return np.sum(np.abs(a - b))
 
 def same_color(a: list, b: list, threshold: int = 20):
 	'''
