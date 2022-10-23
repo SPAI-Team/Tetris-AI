@@ -140,7 +140,7 @@ class ImageProcessor():
 		img = np.array(ImageGrab.grab(bbox=self.coords))
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
-		board = np.full((20, 10))
+		board = np.full((20, 10), 0)
 		if (empty_board):
 			extra = self.block_size * 9
 		else:

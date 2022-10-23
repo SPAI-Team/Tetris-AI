@@ -77,6 +77,8 @@ def differ(a: list, b: list):
 	*a* -> the first color
 	*b* -> the second color
 	'''
+	a = np.array(a)
+	b = np.array(b)
 	return np.sum(np.abs(a - b))
 
 def same_color(a: list, b: list, threshold: int = 20):

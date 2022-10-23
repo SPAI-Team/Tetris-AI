@@ -65,7 +65,7 @@ class MainApp(ct.CTk):
 		global run_ai
 		self.start = not self.start
 		run_ai = self.start
-		thread_AI(self.coords)
+		self.thread_AI(self.coords)
 		if self.start:
 			self.set_status('running')
 			self.button.configure(fg_color = rgb_hack((238, 154, 154)), text="Stop")
@@ -96,42 +96,47 @@ class MainApp(ct.CTk):
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 		cv2.imshow('Captured', img)
 
-def sync_AI(coords):
-	'''
-		Synchronous AI Loop
-	'''
-	trans = Translator()
-	img_pro = ImageProcessor(coords)
+	def sync_AI(self, coords):
+		'''
+			Synchronous AI Loop
+		'''
+		trans = Translator()
+		img_pro = ImageProcessor(coords)
 
-	img = np.array(ImageGrab.grab(bbox = coords))
-	img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
-
-	img_pro.quick_setup()
-	piece = img_pro.get_cur(img)
-	next_piece = img_pro.get_next(img)
-	img_pro.wait_go()
-	first_time = 2
-	img = np.array(ImageGrab.grab(bbox = coords))
-	img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
-	while run_ai:
-		board = img_pro.get_board(img, empty_board = first_time)
-		if first_time > 0:
-			first_time -= 1
-		x_move, rotation = trans.get_best_move(board, piece, next_piece)
-		piece = next_piece
-		next_piece = img_pro.get_next(img)
-		trans.perform_move(x_move, rotation)
 		img = np.array(ImageGrab.grab(bbox = coords))
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
-		time.sleep(1 / PLAY_REFRESH_RATE)
 
-def thread_AI(coords):
-	'''
-		Threaded sync_AI to enable non-blocking code. Otherwise, tkinter does not work.
-	'''
-	t1 = threading.Thread(target = lambda: sync_AI(coords))
-	t1.start()
-	
+		img_pro.quick_setup()
+		piece = img_pro.get_cur(img)
+		next_piece = img_pro.get_next(img)
+		img_pro.wait_go()
+		first_time = 2
+		img = np.array(ImageGrab.grab(bbox = coords))
+		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+		while run_ai:
+			try:
+				board = img_pro.get_board(img, empty_board = first_time)
+				if first_time > 0:
+					first_time -= 1
+				x_move, rotation = trans.get_best_move(board, piece, next_piece)
+				piece = next_piece
+				next_piece = img_pro.get_next(img)
+				trans.perform_move(x_move, rotation)
+				img = np.array(ImageGrab.grab(bbox = coords))
+				img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+				time.sleep(1 / PLAY_REFRESH_RATE)
+			except:
+				break
+		self.play_toggle()
+
+	def thread_AI(self, coords):
+		'''
+			Threaded sync_AI to enable non-blocking code. Otherwise, tkinter does not work.
+		'''
+		if (run_ai):
+			t1 = threading.Thread(target = lambda: self.sync_AI(coords))
+			t1.start()
+		
 
 if __name__ == '__main__':
 	app = QtWidgets.QApplication(sys.argv)
