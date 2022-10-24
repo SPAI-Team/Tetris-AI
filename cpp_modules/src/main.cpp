@@ -116,6 +116,7 @@ std::string mainProcess(char const *inputStr, RequestType requestType) {
 }
 
 int main(){
+	// while (true) {
 	char* s = static_cast<char*>(calloc(255,sizeof(char)));
 	scanf("%255s",s);
 	std::string result = mainProcess(
@@ -124,6 +125,7 @@ int main(){
 		RequestType()
 		);
 	printf("%s\n", result.c_str());
+	// }
 }
 
 // 00000000000000000000000000000000000000000000000000000000000000000011100000001110000000111100000111110000011110000011111100011101110011101110001111111000111111100111111110011111111001111111101111111110|18|4|0|0|X...|

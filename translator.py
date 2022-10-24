@@ -1,8 +1,7 @@
-from subprocess import Popen, check_output, check_call, PIPE, call, run, STDOUT
+from subprocess import  PIPE, run
+import time
 from config import *
-import ctypes	
 import os
-import sys
 import pyautogui
 import numpy as np
 
@@ -58,6 +57,14 @@ class Translator():
 
     def get_best_move(self, board, current_piece, next_piece):
         encoded = self.encode_details(board, current_piece, next_piece)
+        # p = subprocess.Popen(exe_path,
+        #                     stdin=subprocess.PIPE, 
+        #                     stdout=subprocess.PIPE,
+        #                     stderr=subprocess.STDOUT)
+        # while p.poll() is None:
+        #     p.stdin.write(some_command)
+        #     p.stdin.flush()
+        #     out = p.stdout.readline()
         p = run(
             ['cpp_modules/src/main.exe'],
             stdout=PIPE,
@@ -70,22 +77,4 @@ class Translator():
         rotation += self.piece_detail[current_piece]['rotation_bias']
         return x_move, rotation
 
-    def perform_move(self, x_move, rotation):
-        print('moving:', x_move, rotation)
-        multiplier = 0.0
-        pause = False
-        rotation = rotation % 4
-        if abs(rotation - 4) < rotation:
-            rotation = rotation - 4
-
-        if rotation < 0:
-            pyautogui.press('z', presses = abs(rotation), interval=np.random.random() * multiplier, _pause=pause)
-        else:
-            pyautogui.press('up', presses = abs(rotation), interval=np.random.random() * multiplier, _pause=pause)
-        
-        if x_move < 0:
-            pyautogui.press('left', presses = abs(x_move), interval=np.random.random() * multiplier, _pause=pause)
-        else:
-            pyautogui.press('right', presses = abs(x_move), interval=np.random.random() * multiplier, _pause=pause)
-        
-        pyautogui.press('space')
+    # def perform_move(self, x_move, rotation):

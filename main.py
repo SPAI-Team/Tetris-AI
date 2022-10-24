@@ -12,6 +12,8 @@ from imageprocessor import ImageProcessor
 from screenlocate import ScreenLocate
 from config import *
 import os
+import pyautogui
+
 
 from utils import *
 
@@ -116,16 +118,36 @@ class MainApp(ct.CTk):
 
 		while run_ai:
 			try:
+				start = time.time()
 				board = img_pro.get_board(img, empty_board = first_time)
+				temp = img_pro.get_next(img)
+				print("get board and next",time.time() - start)
+				start = time.time()
+
+				x_move, rotation = trans.get_best_move(board, piece, next_piece)
+				print("c++ run",time.time() - start)
+
 				if first_time > 0:
 					first_time -= 1
-				x_move, rotation = trans.get_best_move(board, piece, next_piece)
+
 				piece = next_piece
-				next_piece = img_pro.get_next(img)
-				trans.perform_move(x_move, rotation)
+				next_piece = temp
+				
+				pause = False
+				rotation = rotation % 4
+				if abs(rotation - 4) < rotation:
+					rotation = rotation - 4
+
+				rot = 'z' if rotation < 0 else 'up'
+				mov = 'left' if x_move < 0 else 'right'
+
+				pyautogui.press(rot, presses = abs(rotation), interval=0, _pause=pause)
+				pyautogui.press(mov, presses = abs(x_move), interval=0, _pause=pause)
+				time.sleep(1 / REFRESH_RATE)
+
+				pyautogui.press('space', presses = 1, interval=0, _pause = True)
 				img = np.array(ImageGrab.grab(bbox = coords))
 				img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
-				time.sleep(1 / PLAY_REFRESH_RATE)
 			except:
 				break
 		self.play_toggle()

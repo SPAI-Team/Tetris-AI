@@ -1,3 +1,4 @@
+from joblib import Parallel
 import numpy as np
 from colors import piece_color, next_piece_color
 

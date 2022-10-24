@@ -1,4 +1,5 @@
 import cv2
+from joblib import Parallel, delayed
 import numpy as np
 from PIL import ImageGrab
 from config import *
@@ -136,30 +137,37 @@ class ImageProcessor():
 				break
 			time.sleep(1 / REFRESH_RATE)
 
-	def get_board(self, img, empty_board = False):
-		img = np.array(ImageGrab.grab(bbox=self.coords))
-		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+	def fill_board(self, img, i, j, board):
+		i_block = math.floor((i - self.board_start[0]) / self.block_size)
+		j_block = math.floor((j - self.board_start[1]) / self.block_size)
+		board[j_block][i_block] = int(get_piece(img[j][i], mode='gray', threshold=120))
 
+	def get_board(self, img, empty_board = False):
 		board = np.full((20, 10), 0)
+
 		if (empty_board):
 			extra = self.block_size * 9
 		else:
 			extra = 0
 		
-		for i in range(self.half_block + self.board_start[0], self.board_end[0], self.block_size):
-			for j in range(self.half_block + self.board_start[1] + self.block_size * 3 + extra, self.board_end[1], self.block_size):
+		start = time.time()
+		Parallel(n_jobs = -1, require='sharedmem')(delayed(self.fill_board)(img, i, j, board)
+			for i in range(self.half_block + self.board_start[0], self.board_end[0], self.block_size)
+			for j in range(self.half_block + self.board_start[1] + self.block_size * 3 + extra, self.board_end[1], self.block_size)
+		)
+		print('get board parallel', time.time() - start)
 				# for dis in range(-2, 3):
 				# 	for dis_y in range(-2, 3):
 				# 		copying[j + dis][i + dis_y] = [255, 0, 0]
-				i_block = math.floor((i - self.board_start[0]) / self.block_size)
-				j_block = math.floor((j - self.board_start[1]) / self.block_size)
-				board[j_block][i_block] = int(get_piece(img[j][i], mode='gray', threshold=120))
+				# i_block = math.floor((i - self.board_start[0]) / self.block_size)
+				# j_block = math.floor((j - self.board_start[1]) / self.block_size)
+				# board[j_block][i_block] = int(get_piece(img[j][i], mode='gray', threshold=120))
 		
 		# cv2.imwrite('./board.jpg', copying)
 		# cv2.waitKey(0)
-		if True:
-			for row in board:
-				print("".join(list(map(str, row))))
+		# if True:
+		# 	for row in self.board:
+		# 		print("".join(list(map(str, row))))
 		return board
 
 		## Current Piece
@@ -181,16 +189,20 @@ class ImageProcessor():
 
 		# print('piece:',piece)
 		return piece
+
+	def extract_piece(self, piece_coord, img):
+		p_y = int(piece_coord[1] * self.y_len)
+		p_x = int(piece_coord[0] * self.x_len)
+		extracted_piece = get_piece(img[p_y][p_x], context='next_piece', threshold=120)
+		return None if extracted_piece == 'X' else extracted_piece
 			
 	def get_next(self, img):
 		## Next Piece
-		next_pieces = []
-		for piece_coord in NEXT_RATIO:
-			p_y = int(piece_coord[1] * self.y_len)
-			p_x = int(piece_coord[0] * self.x_len)
-			extracted_piece = get_piece(img[p_y][p_x], context='next_piece', threshold=120)
-			next_pieces.append(None if extracted_piece == 'X' else extracted_piece)
-
+		start = time.time()
+		next_pieces = Parallel(n_jobs = -1, require='sharedmem')(
+			delayed(self.extract_piece)(piece_coord, img) for piece_coord in NEXT_RATIO
+		)
+		print('get next parallel', time.time() - start)
 		# cv2.imwrite(f'./next{time.time()}.jpg', copying)
 		# cv2.waitKey(0)
 		next_piece = None
@@ -199,5 +211,4 @@ class ImageProcessor():
 		if next_piece == None:
 			next_piece = 'I'
 		
-		print('next_piece', next_piece)
 		return next_piece
