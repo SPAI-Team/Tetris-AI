@@ -1,4 +1,4 @@
-from subprocess import  PIPE, run
+import subprocess
 import time
 from config import *
 import os
@@ -45,6 +45,7 @@ class Translator():
                 'rotation_bias': 0
             }
         }
+        self.count = 0
 
     def encode_details(self, board, current_piece, next_piece):
         encoded_board = ''
@@ -56,22 +57,17 @@ class Translator():
         return f'{encoded_board}|{NES_LEVEL}|1|{cur}|{nex}|X...|'
 
     def get_best_move(self, board, current_piece, next_piece):
+        if self.count % 200 == 0:
+            self.p = subprocess.Popen('cpp_modules/src/main.exe',
+                                stdin=subprocess.PIPE, 
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT)
+            count = 0
+        count += 1
         encoded = self.encode_details(board, current_piece, next_piece)
-        # p = subprocess.Popen(exe_path,
-        #                     stdin=subprocess.PIPE, 
-        #                     stdout=subprocess.PIPE,
-        #                     stderr=subprocess.STDOUT)
-        # while p.poll() is None:
-        #     p.stdin.write(some_command)
-        #     p.stdin.flush()
-        #     out = p.stdout.readline()
-        p = run(
-            ['cpp_modules/src/main.exe'],
-            stdout=PIPE,
-            input=encoded,
-            encoding='ascii'
-        )
-        result = p.stdout.rstrip('\n')
+        self.p.stdin.write('{}\n'.format(encoded).encode('utf-8'))
+        self.p.stdin.flush()
+        result = self.p.stdout.readline().decode('utf-8').rstrip('\n')
         rotation, x_move, _ = list(map(int, result.split('|')))
         x_move += self.piece_detail[current_piece]['x_bias']
         rotation += self.piece_detail[current_piece]['rotation_bias']

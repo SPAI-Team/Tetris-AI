@@ -1,6 +1,6 @@
 from joblib import Parallel
 import numpy as np
-from colors import piece_color, next_piece_color
+from colors import colors, name, next_color
 
 
 def rgb_hack(rgb: list):
@@ -38,19 +38,14 @@ def get_piece(color: list, mode: str = 'normal', threshold: int = 60, context: s
 
 	# Defining which color dicitonary we want
 	if context == 'piece':
-		color_dict = piece_color
+		color_val = colors
 	elif context == 'next_piece':
-		color_dict = next_piece_color
+		color_val = next_color
 
 	# Find the most probable piece that also fits the color difference threshold
-	best_piece = 'X'
-	best_dist = 10000
-	for k, v in color_dict.items():
-		difference = differ(v, color)
-		if best_dist > difference and difference < threshold:
-			best_piece = k
-			best_dist = difference
-	
+	idx = np.argmin(np.sum(np.abs(colors - np.resize(color, (9, 3))), axis=1))
+	best_piece = name[idx]
+
 	if mode == 'gray':
 		# Return 1 if it is a valid piece, otherwise 0 (no piece).
 		return not (differ(color, np.array([0, 0, 0])) < 10)

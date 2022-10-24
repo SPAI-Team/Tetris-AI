@@ -143,9 +143,10 @@ class MainApp(ct.CTk):
 
 				pyautogui.press(rot, presses = abs(rotation), interval=0, _pause=pause)
 				pyautogui.press(mov, presses = abs(x_move), interval=0, _pause=pause)
-				time.sleep(1 / REFRESH_RATE)
+				# time.sleep(1 / REFRESH_RATE)
+				pyautogui.press('space', presses = 1, interval=0, _pause = False)
+				time.sleep(0.05)
 
-				pyautogui.press('space', presses = 1, interval=0, _pause = True)
 				img = np.array(ImageGrab.grab(bbox = coords))
 				img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 			except:

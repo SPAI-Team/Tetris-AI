@@ -153,7 +153,7 @@ class ImageProcessor():
 		start = time.time()
 		Parallel(n_jobs = -1, require='sharedmem')(delayed(self.fill_board)(img, i, j, board)
 			for i in range(self.half_block + self.board_start[0], self.board_end[0], self.block_size)
-			for j in range(self.half_block + self.board_start[1] + self.block_size * 3 + extra, self.board_end[1], self.block_size)
+			for j in range(self.half_block + self.board_start[1] + self.block_size * 1 + extra, self.board_end[1], self.block_size)
 		)
 		print('get board parallel', time.time() - start)
 				# for dis in range(-2, 3):
