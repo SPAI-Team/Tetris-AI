@@ -117,38 +117,38 @@ class MainApp(ct.CTk):
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
 		while run_ai:
-			# try:
-			start = time.time()
-			board = img_pro.get_board(img, empty_board = first_time)
-			temp = img_pro.get_next(img)
-			start = time.time()
+			try:
+				start = time.time()
+				board = img_pro.get_board(img, empty_board = first_time)
+				temp = img_pro.get_next(img)
+				start = time.time()
 
-			x_move, rotation = trans.get_best_move(board, piece, next_piece)
+				x_move, rotation = trans.get_best_move(board, piece, next_piece)
 
-			if first_time > 0:
-				first_time -= 1
+				if first_time > 0:
+					first_time -= 1
 
-			piece = next_piece
-			next_piece = temp
-			
-			pause = False
-			rotation = rotation % 4
-			if abs(rotation - 4) < rotation:
-				rotation = rotation - 4
+				piece = next_piece
+				next_piece = temp
+				
+				pause = False
+				rotation = rotation % 4
+				if abs(rotation - 4) < rotation:
+					rotation = rotation - 4
 
-			rot = 'z' if rotation < 0 else 'up'
-			mov = 'left' if x_move < 0 else 'right'
+				rot = 'z' if rotation < 0 else 'up'
+				mov = 'left' if x_move < 0 else 'right'
 
-			pyautogui.press(rot, presses = abs(rotation), interval=0, _pause=pause)
-			pyautogui.press(mov, presses = abs(x_move), interval=0, _pause=pause)
-			# time.sleep(1 / REFRESH_RATE)
-			pyautogui.press('space', presses = 1, interval=0, _pause = False)
-			time.sleep(0.05)
+				pyautogui.press(rot, presses = abs(rotation), interval=0, _pause=pause)
+				pyautogui.press(mov, presses = abs(x_move), interval=0, _pause=pause)
+				# time.sleep(1 / REFRESH_RATE)
+				pyautogui.press('space', presses = 1, interval=0, _pause=pause)
+				time.sleep(0.05)
 
-			img = np.array(ImageGrab.grab(bbox = coords))
-			img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
-			# except:
-			# 	break
+				img = np.array(ImageGrab.grab(bbox = coords))
+				img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+			except:
+				break
 		self.play_toggle()
 
 	def thread_AI(self, coords):

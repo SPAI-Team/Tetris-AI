@@ -7,10 +7,10 @@ import numpy as np
 
 class Translator():
     def __init__(self):
-        try:
-            os.system('C:/cygwin64/bin/g++ /cygdrive/c/Users/Student/Desktop/Tetris-AI/cpp_modules/src/main.cpp -o /cygdrive/c/Users/Student/Desktop/Tetris-AI/cpp_modules/src/main')
-        except:
-            os.system('C:/cygwin64/bin/bash -c "g++ C:/Users/p2100072/Desktop/Tetris-AI/cpp_modules/src/main.cpp -o C:/Users/p2100072/Desktop/Tetris-AI/cpp_modules/src/main"')
+        # try:
+        # os.system('C:/cygwin64/bin/g++ /cygdrive/c/Users/Student/Desktop/Tetris-AI/cpp_modules/src/main.cpp -o /cygdrive/c/Users/Student/Desktop/Tetris-AI/cpp_modules/src/main')
+        # except:
+        os.system('C:/cygwin64/bin/bash -c "g++ C:/Users/p2100072/Desktop/Tetris-AI/cpp_modules/src/main.cpp -o C:/Users/p2100072/Desktop/Tetris-AI/cpp_modules/src/main"')
         self.piece_detail = {
             'I': {
                 'id': 0,
