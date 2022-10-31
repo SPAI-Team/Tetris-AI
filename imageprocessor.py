@@ -155,19 +155,6 @@ class ImageProcessor():
 			for i in range(self.half_block + self.board_start[0], self.board_end[0], self.block_size)
 			for j in range(self.half_block + self.board_start[1] + self.block_size * 1 + extra, self.board_end[1], self.block_size)
 		)
-		print('get board parallel', time.time() - start)
-				# for dis in range(-2, 3):
-				# 	for dis_y in range(-2, 3):
-				# 		copying[j + dis][i + dis_y] = [255, 0, 0]
-				# i_block = math.floor((i - self.board_start[0]) / self.block_size)
-				# j_block = math.floor((j - self.board_start[1]) / self.block_size)
-				# board[j_block][i_block] = int(get_piece(img[j][i], mode='gray', threshold=120))
-		
-		# cv2.imwrite('./board.jpg', copying)
-		# cv2.waitKey(0)
-		# if True:
-		# 	for row in self.board:
-		# 		print("".join(list(map(str, row))))
 		return board
 
 		## Current Piece
@@ -202,9 +189,6 @@ class ImageProcessor():
 		next_pieces = Parallel(n_jobs = -1, require='sharedmem')(
 			delayed(self.extract_piece)(piece_coord, img) for piece_coord in NEXT_RATIO
 		)
-		print('get next parallel', time.time() - start)
-		# cv2.imwrite(f'./next{time.time()}.jpg', copying)
-		# cv2.waitKey(0)
 		next_piece = None
 		for p in next_pieces:
 			next_piece = next_piece or p

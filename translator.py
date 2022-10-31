@@ -7,7 +7,10 @@ import numpy as np
 
 class Translator():
     def __init__(self):
-        os.system('g++ cpp_modules/src/main.cpp -o cpp_modules/src/main')
+        try:
+            os.system('C:/cygwin64/bin/g++ /cygdrive/c/Users/Student/Desktop/Tetris-AI/cpp_modules/src/main.cpp -o /cygdrive/c/Users/Student/Desktop/Tetris-AI/cpp_modules/src/main')
+        except:
+            os.system('C:/cygwin64/bin/bash -c "g++ C:/Users/p2100072/Desktop/Tetris-AI/cpp_modules/src/main.cpp -o C:/Users/p2100072/Desktop/Tetris-AI/cpp_modules/src/main"')
         self.piece_detail = {
             'I': {
                 'id': 0,
@@ -46,6 +49,12 @@ class Translator():
             }
         }
         self.count = 0
+        self.p = subprocess.Popen('cpp_modules/src/main.exe',
+                            stdin=subprocess.PIPE, 
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+        # self.p.stdin.write('{}\n'.format(encoded).encode('utf-8'))
+        # self.p.stdin.flush()
 
     def encode_details(self, board, current_piece, next_piece):
         encoded_board = ''
@@ -57,20 +66,14 @@ class Translator():
         return f'{encoded_board}|{NES_LEVEL}|1|{cur}|{nex}|X...|'
 
     def get_best_move(self, board, current_piece, next_piece):
-        if self.count % 200 == 0:
-            self.p = subprocess.Popen('cpp_modules/src/main.exe',
-                                stdin=subprocess.PIPE, 
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT)
-            count = 0
-        count += 1
+        # print('called')
+        # self.count = (self.count + 1) % 5
         encoded = self.encode_details(board, current_piece, next_piece)
         self.p.stdin.write('{}\n'.format(encoded).encode('utf-8'))
         self.p.stdin.flush()
-        result = self.p.stdout.readline().decode('utf-8').rstrip('\n')
+        result = self.p.stdout.readline().decode('utf-8').split()[0]
         rotation, x_move, _ = list(map(int, result.split('|')))
         x_move += self.piece_detail[current_piece]['x_bias']
         rotation += self.piece_detail[current_piece]['rotation_bias']
+        # self.p.kill()
         return x_move, rotation
-
-    # def perform_move(self, x_move, rotation):

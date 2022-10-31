@@ -29,5 +29,3 @@ next_color = np.array([
 ])
 
 color = np.array([12, 120, 50])
-
-print(np.argmin(np.sum(np.abs(colors - np.resize(color, (9, 3))), axis=1)))
