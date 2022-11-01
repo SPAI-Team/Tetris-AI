@@ -8,12 +8,13 @@ import numpy as np
 class Translator():
     def __init__(self):
 
-        if os.path.isdir('C:/Users/Student/Desktop/Tetris-AI-main/cpp_modules/src'):
-            os.system('C:/cygwin64/bin/bash -c "g++ C:/Users/Student/Desktop/Tetris-AI-main/cpp_modules/src/main.cpp -o C:/Users/Student/Desktop/Tetris-AI-main/cpp_modules/src/main"')
-        elif os.path.isdir('C:/Users/Student/Desktop/Tetris-AI/cpp_modules/src'):
-            os.system('C:/cygwin64/bin/bash -c "g++ C:/Users/Student/Desktop/Tetris-AI/cpp_modules/src/main.cpp -o C:/Users/Student/Desktop/Tetris-AI/cpp_modules/src/main"')
-        else:
-            os.system('C:/cygwin64/bin/bash -c "g++ C:/Users/p2100072/Desktop/Tetris-AI/cpp_modules/src/main.cpp -o C:/Users/p2100072/Desktop/Tetris-AI/cpp_modules/src/main"')
+        if not os.path.isfile('C:/Users/Student/Desktop/Tetris-AI-main/cpp_modules/src/main.exe'):
+            if os.path.isdir('C:/Users/Student/Desktop/Tetris-AI-main/cpp_modules/src'):
+                os.system('C:/cygwin64/bin/bash -c "g++ -std=c++11 C:/Users/Student/Desktop/Tetris-AI-main/cpp_modules/src/main.cpp -o C:/Users/Student/Desktop/Tetris-AI-main/cpp_modules/src/main"')
+            elif os.path.isdir('C:/Users/Student/Desktop/Tetris-AI/cpp_modules/src'):
+                os.system('C:/cygwin64/bin/bash -c "g++ -std=c++11 C:/Users/Student/Desktop/Tetris-AI/cpp_modules/src/main.cpp -o C:/Users/Student/Desktop/Tetris-AI/cpp_modules/src/main"')
+            else:
+                os.system('C:/cygwin64/bin/bash -c "g++ -std=c++11 C:/Users/p2100072/Desktop/Tetris-AI/cpp_modules/src/main.cpp -o C:/Users/p2100072/Desktop/Tetris-AI/cpp_modules/src/main"')
 
         self.piece_detail = {
             'I': {

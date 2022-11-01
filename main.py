@@ -118,10 +118,8 @@ class MainApp(ct.CTk):
 
 		while run_ai:
 			try:
-				start = time.time()
 				board = img_pro.get_board(img, empty_board = first_time)
 				temp = img_pro.get_next(img)
-				start = time.time()
 
 				x_move, rotation = trans.get_best_move(board, piece, next_piece)
 
@@ -130,7 +128,7 @@ class MainApp(ct.CTk):
 
 				piece = next_piece
 				next_piece = temp
-				
+					
 				pause = False
 				rotation = rotation % 4
 				if abs(rotation - 4) < rotation:
@@ -141,7 +139,6 @@ class MainApp(ct.CTk):
 
 				pyautogui.press(rot, presses = abs(rotation), interval=0, _pause=pause)
 				pyautogui.press(mov, presses = abs(x_move), interval=0, _pause=pause)
-				# time.sleep(1 / REFRESH_RATE)
 				pyautogui.press('space', presses = 1, interval=0, _pause=pause)
 				time.sleep(0.05)
 

@@ -105,7 +105,7 @@ class ImageProcessor():
 		self.board_start = [int(BOARD_RATIO[0][0] * self.x_len), int(BOARD_RATIO[0][1] * self.y_len)]
 		self.board_end = [int(BOARD_RATIO[1][0] * self.x_len), int(BOARD_RATIO[1][1] * self.y_len)]
 
-		self.block_size = int(
+		self.block_size = math.ceil(
 			np.mean([
 				(self.board_end[1] - self.board_start[1]) / 20,
 				(self.board_end[0] - self.board_start[0]) / 10
@@ -151,13 +151,24 @@ class ImageProcessor():
 			extra = 0
 		
 		start = time.time()
+		# for i in range(self.half_block + self.board_start[0], self.board_end[0], self.block_size):
+		# 	for j in range(self.half_block + self.board_start[1] + self.block_size * 1 + extra, self.board_end[1], self.block_size):
+		# 		for dis_x in range(-2, 3):
+		# 			for dis_y in range(-2, 3):
+		# 				img[j + dis_y - 3][i + dis_x - 3] = [255, 0, 0]
+		# for dis_x in range(-2, 3):
+		# 	for dis_y in range(-2, 3):
+		# 		img[self.board_start[1] + dis_y - 3][self.board_start[0] + dis_x - 3] = [255, 0, 255]
+		# 		img[self.board_end[1] + dis_y - 3][self.board_end[0] + dis_x - 3] = [255, 0, 255]
+		# cv2.imwrite('board.jpg', img)
+
 		Parallel(n_jobs = -1, require='sharedmem')(delayed(self.fill_board)(img, i, j, board)
 			for i in range(self.half_block + self.board_start[0], self.board_end[0], self.block_size)
 			for j in range(self.half_block + self.board_start[1] + self.block_size * 1 + extra, self.board_end[1], self.block_size)
 		)
-		return board
 
 		## Current Piece
+		return board
 	
 	def get_cur(self, img):
 		## Cur Piece
