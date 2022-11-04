@@ -102,7 +102,7 @@ class MainApp(ct.CTk):
 
 		img = np.array(ImageGrab.grab(bbox = coords))
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
-
+		cv2.imwrite('other.jpg', img)
 		img_pro.quick_setup()
 		piece = img_pro.get_cur(img)
 		next_piece = img_pro.get_next(img)
@@ -111,7 +111,6 @@ class MainApp(ct.CTk):
 		img = np.array(ImageGrab.grab(bbox = coords))
 		img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 
-		print(self.speed)
 		while run_ai:
 			try:
 				board = img_pro.get_board(img, empty_board = first_time)

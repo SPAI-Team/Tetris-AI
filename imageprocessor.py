@@ -105,7 +105,7 @@ class ImageProcessor():
 		self.board_start = [int(BOARD_RATIO[0][0] * self.x_len), int(BOARD_RATIO[0][1] * self.y_len)]
 		self.board_end = [int(BOARD_RATIO[1][0] * self.x_len), int(BOARD_RATIO[1][1] * self.y_len)]
 
-		self.block_size = int(
+		self.block_size = math.ceil(
 			np.mean([
 				(self.board_end[1] - self.board_start[1]) / 20,
 				(self.board_end[0] - self.board_start[0]) / 10
@@ -166,7 +166,7 @@ class ImageProcessor():
 		# cv2.imwrite('board.jpg', img)
 		img_pass = img.copy()
 
-		Parallel(n_jobs = -1, require='sharedmem')(delayed(self.fill_board)(img, i, j, board, img_pass)
+		Parallel(n_jobs = -1, require='sharedmem')(delayed(self.fill_board)(img, i, j - 3, board, img_pass)
 			for i in range(self.half_block + self.board_start[0], self.board_end[0], self.block_size)
 			for j in range(self.half_block + self.board_start[1] + self.block_size * 1 + extra, self.board_end[1], self.block_size)
 		)
