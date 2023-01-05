@@ -6,6 +6,7 @@ from PIL import ImageGrab
 import numpy as np
 import customtkinter as ct
 import threading
+import socket
 import time
 from translator import Translator
 from imageprocessor import ImageProcessor
@@ -13,7 +14,7 @@ from screenlocate import ScreenLocate
 from config import *
 import os
 import pyautogui
-
+import pygetwindow as gw
 
 from utils import *
 
@@ -48,13 +49,24 @@ class MainApp(ct.CTk):
 		self.abs_c = [None, None, None, None]
 		self.capturing = [False]
 
-		# self.locate = ScreenLocate(self, self.coords, self.capturing)
+		foods = [
+			'AI-Beehoon', 'AI-TehTarik', 'AI-CurryPuff', 'AI-MeeGoreng', 'AI-DuckRice', 'AI-CurryRice',
+			'AI-CharSiu', 'AI-HokkienMee', 'AI-BakKutTeh', 'AI-CharKwayTeow', 'AI-ChaiTowKway', 'AI-FishballSoup',
+			'AI-KayaToast', 'AI-Meepok', 'AI-AyamPenyet', 'AI-IceKachang', 'AI-MiloDinosaur', 'AI-ChilliGrab',
+			'AI-CerealPrawn', 'AI-Banmian', 'AI-ChickenRice', 'AI-Satay', 'AI-OrganSoup', 'AI-PepperCrab'
+		]
 
-		status_title = ct.CTkLabel(self, text = 'Status:', text_font='monospace')
+		comp_id = int(socket.gethostname().split('-')[1])
+		name = foods[comp_id]
+
+		status_title = ct.CTkLabel(self, text = name, text_font='monospace', text_color=rgb_hack((238, 108, 77)))
 		status_title.place(relx = 0.5, rely = 0.1, anchor = tk.CENTER)
 
+		status_title = ct.CTkLabel(self, text = 'Status:', text_font='monospace')
+		status_title.place(relx = 0.5, rely = 0.16, anchor = tk.CENTER)
+
 		self.status = ct.CTkLabel(self, text = self.statuses[0][0], text_color = self.statuses[0][1])
-		self.status.place(relx = 0.5, rely = 0.144, anchor = tk.CENTER)
+		self.status.place(relx = 0.5, rely = 0.204, anchor = tk.CENTER)
 
 		self.input = ct.CTkEntry(self, placeholder_text="Enter Speed")
 		self.input.pack(padx = 20, pady = 10)
@@ -65,6 +77,7 @@ class MainApp(ct.CTk):
 		self.confirm_speed_button.place(relx = 0.5, rely = 0.4, anchor=tk.CENTER)
 
 		self.start = False
+		self.win = gw.getWindowsWithTitle('TETR.IO - Google Chrome')[0]
 
 		self.button = ct.CTkButton(self,text="Start",command=self.play_toggle, fg_color=rgb_hack((193, 237, 172)), text_color='black', hover=False)
 		self.button.place(relx = 0.5, rely = 0.5, anchor = tk.CENTER)
@@ -73,11 +86,12 @@ class MainApp(ct.CTk):
 		global run_ai
 		self.start = not self.start
 		run_ai = self.start
-		print(self.coords)
 		self.thread_AI(self.coords)
 		if self.start:
 			self.set_status('running')
 			self.button.configure(fg_color = rgb_hack((238, 154, 154)), text="Stop")
+
+			self.win.activate()
 		else:
 			self.set_status('ready')
 			self.button.configure(fg_color = rgb_hack((193, 237, 172)), text="Start")
@@ -135,13 +149,12 @@ class MainApp(ct.CTk):
 				pyautogui.press(rot, presses = abs(rotation), interval=0, _pause=pause)
 				pyautogui.press(mov, presses = abs(x_move), interval=0, _pause=pause)
 				pyautogui.press('space', presses = 1, interval=0, _pause=pause)
-				time.sleep(0.05)
-				# time.sleep(max(0.05, 0.55 * (1 / self.speed)))
+				time.sleep(max(0.05, 0.55 * (1 / self.speed)))
 
 				img = np.array(ImageGrab.grab(bbox = coords))
 				img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
 			except:
-				self.input.configure(state='normal')
+				self.input.configure(state='normal', fg_color = rgb_hack((255, 255, 255)))
 				break
 		self.play_toggle()
 
