@@ -5,6 +5,7 @@ import tkinter as tk
 from PIL import ImageGrab
 import numpy as np
 import customtkinter as ct
+import random
 import threading
 import socket
 import time
@@ -53,10 +54,19 @@ class MainApp(ct.CTk):
 			'AI-Beehoon', 'AI-TehTarik', 'AI-CurryPuff', 'AI-MeeGoreng', 'AI-DuckRice', 'AI-CurryRice',
 			'AI-CharSiu', 'AI-HokkienMee', 'AI-BakKutTeh', 'AI-CharKwayTeow', 'AI-ChaiTowKway', 'AI-FishballSoup',
 			'AI-KayaToast', 'AI-Meepok', 'AI-AyamPenyet', 'AI-IceKachang', 'AI-MiloDinosaur', 'AI-ChilliGrab',
-			'AI-CerealPrawn', 'AI-Banmian', 'AI-ChickenRice', 'AI-Satay', 'AI-OrganSoup', 'AI-PepperCrab'
+			'AI-CerealPrawn', 'AI-Banmian', 'AI-ChickenRice', 'AI-Satay', 'AI-OrganSoup', 'AI-PepperCrab',
+			'AI-RotiPrata', 'AI-NasiLemak', 'AI-OysterOmelette', 'AI-BakChorMee', 'AI-Laksa', 'AI-Rendang',
+			'AI-SambalStingray', 'AI-CurryFishHead', 'AI-HainaneseChicken', 'AI-NgohHiang', 'AI-SambalSotong',
+			'AI-KwayChap', 'AI-Cendol', 'AI-DurianPengat', 'AI-Rojak', 'AI-PrawnMee', 'AI-FriedHokkienPrawnMee',
+			'AI-CrispySquid', 'AI-CrabBeeHoon', 'AI-FriedCarrotCake', 'AI-OrhLua', 'AI-MeeSiam', 'AI-MeeRebus',
+			'AI-ChickenSatay', 'AI-BeefSatay', 'AI-MuttonSatay', 'AI-Popiah', 'AI-ChweeKueh'
 		]
 
-		comp_id = int(socket.gethostname().split('-')[1])
+		try: 
+			comp_id = int(socket.gethostname().split('-')[1])
+		except:
+			comp_id = random.randint(0, len(foods) - 1)
+
 		name = foods[comp_id]
 
 		status_title = ct.CTkLabel(self, text = name, text_font='monospace', text_color=rgb_hack((238, 108, 77)))
